@@ -30,19 +30,31 @@ public class AnimatorWindow : EditorWindow
     void OnGUI()
     {
         if (GUILayout.Button("Refresh Animator list"))
-        {
             RefreshAnimatorList();
-        }
-        EditorGUILayout.Space();
-
+        
         if (animators == null || animators.Length == 0)
         {
-            GUILayout.Label("/!\\  Animators list is empty  /!\\\n- Refresh Animator List", EditorStyles.boldLabel);
+            EditorGUILayout.Space();
+            CenterStringsInRow(new []{"/!\\  Animators list is empty  /!\\", "Refresh Animator List"}, true);
             return;
         }
- 
-        GUILayout.Label("Nbr animators : " + animators.Length);
+        
+        CenterStringsInRow(new []{"Nbr animators in scene : " + animators.Length}, false);
+        EditorGUILayout.Space();
+        
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("Animators : ");
         objectIndex = EditorGUILayout.Popup(objectIndex, objectsName);
+        GUILayout.FlexibleSpace();
+        if (GUILayout.Button("Select"))
+        {
+            Selection.activeObject = animators[objectIndex].gameObject;
+            SceneView.lastActiveSceneView.FrameSelected();
+            EditorGUIUtility.PingObject(Selection.activeObject);
+        }
+        GUILayout.FlexibleSpace();
+        GUILayout.EndHorizontal();
+        GUILayout.Label("Relative controller :  " + animators[objectIndex].runtimeAnimatorController.name);
 
         EditorGUILayout.Space();
 
@@ -93,5 +105,20 @@ public class AnimatorWindow : EditorWindow
                 list.Add(transform.GetComponent<Animator>());
             GetAnimatorsInChildren(list, transform);
         }
+    }
+
+    //TODO : middle/center + apply different style
+    void CenterStringsInRow(string[] text, bool bold)
+    {
+        GUILayout.BeginHorizontal();
+        GUILayout.FlexibleSpace();
+        foreach (string str in text)
+        {
+            GUILayout.FlexibleSpace();
+            GUILayout.Label(str, bold? EditorStyles.boldLabel:EditorStyles.label);
+            GUILayout.FlexibleSpace();
+        }
+        GUILayout.FlexibleSpace();
+        GUILayout.EndHorizontal();
     }
 }
