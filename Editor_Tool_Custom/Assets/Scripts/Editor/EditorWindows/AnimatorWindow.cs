@@ -36,6 +36,7 @@ public class AnimatorWindow : EditorWindow
 
     void OnGUI()
     {
+        if (window == null) return;
         if (GUILayout.Button("Refresh Animator list"))
             RefreshAnimatorList();
 

@@ -1,9 +1,11 @@
 ﻿using UnityEditor;
+using UnityEditor.Callbacks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class ToolboxWindow : EditorWindow
 {
+    private static float _lastCompilationTime = 0f;
 
     [MenuItem("Toolbox/Toolbox Window")]
     [MenuItem("Window/Toolbox/Toolbox Window")]
@@ -55,5 +57,15 @@ public class ToolboxWindow : EditorWindow
                 Selection.objects = scene.GetRootGameObjects();
             }
         }
+
+        GUILayout.FlexibleSpace();
+        EditorGUILayout.LabelField("Last compilation Time : " + _lastCompilationTime);
+    }
+
+
+    [DidReloadScripts]
+    private static void RefreshLastCompilationTime()
+    {
+        _lastCompilationTime = (float)EditorApplication.timeSinceStartup;
     }
 }

@@ -44,9 +44,9 @@ public class GameDataInspector : Editor
 
         //Nb Players
         //Default property GUI
-        //EditorGUILayout.PropertyField(nbPlayersProperty);
+        EditorGUILayout.PropertyField(nbPlayersProperty);
         //Slider
-        nbPlayersProperty.intValue = EditorGUILayout.IntSlider(nbPlayersGUIContent, nbPlayersProperty.intValue, 1, 4);
+        //nbPlayersProperty.intValue = EditorGUILayout.IntSlider(nbPlayersGUIContent, nbPlayersProperty.intValue, 1, 4);
 
         //Players speed
         //Default property GUI
@@ -56,6 +56,8 @@ public class GameDataInspector : Editor
             SerializedProperty playerSpeedProperty = playersSpeedProperty.GetArrayElementAtIndex(i);
             EditorGUILayout.PropertyField(playerSpeedProperty, playerSpeedGUIContentArr[i]);
         }
+
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("infos"));
 
         serializedObject.ApplyModifiedProperties();
 
