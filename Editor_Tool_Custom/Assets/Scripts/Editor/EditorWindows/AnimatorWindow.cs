@@ -3,24 +3,29 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.Animations;
+using UnityEditor.UIElements;
 using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class AnimatorWindow : EditorWindow
 {
-    private Animator[] animators;
+    public Animator[] animators { get; private set; }
     private string[] objectsName;
     private int currAnim;
 
     private float _lastEditorTime = 0f;
     private bool _isSimulatingAnimation = false;
 
-    [MenuItem("Window/CustomAnimator")]
+    public static AnimatorWindow window;
+
+    private PropertyField _propertyField;
+
+    [MenuItem("Window/AnimatorCustom")]
     static void Init()
     {
-        // Get existing open window or if none, make a new one:
-        AnimatorWindow window = (AnimatorWindow) EditorWindow.GetWindow(typeof(AnimatorWindow));
+        window = (AnimatorWindow) GetWindow(typeof(AnimatorWindow));
+        EditorApplication.playModeStateChanged += window._OnPlayModeStateChange;
         window.Show();
     }
 
@@ -41,7 +46,6 @@ public class AnimatorWindow : EditorWindow
             return;
         }
 
-
         DisplayAndCenterStrings(new[] {"Nbr animators in scene : " + animators.Length}, false, true);
         EditorGUILayout.Space();
 
@@ -49,7 +53,6 @@ public class AnimatorWindow : EditorWindow
         GUILayout.Label("Animators : ");
         currAnim = EditorGUILayout.Popup(currAnim, objectsName);
         GUILayout.FlexibleSpace();
-
         if (GUILayout.Button("Select"))
         {
             Selection.activeObject = animators[currAnim].gameObject;
@@ -59,25 +62,26 @@ public class AnimatorWindow : EditorWindow
 
         GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
+
         GUILayout.Label("Relative controller :  " + animators[currAnim].runtimeAnimatorController.name);
+        //GUILayout.HorizontalSlider(1,0, animators[currAnim].runtimeAnimatorController.animationClips)
+
 
         EditorGUILayout.Space();
-        if(_isSimulatingAnimation)
-            GUILayout.Label("animTime " + (Time.realtimeSinceStartup - _lastEditorTime));
+        GUILayout.Label("Clip time " + (_isSimulatingAnimation
+            ? (Time.realtimeSinceStartup - _lastEditorTime).ToString()
+            : "not playing"));
+        //GUILayout.HorizontalSlider()
 
         if (!_isSimulatingAnimation)
         {
             if (GUILayout.Button("Play anim"))
-            {
                 StartAnimSimulation();
-            }
         }
         else
         {
             if (GUILayout.Button("Stop Anim"))
-            {
                 StopAnimSimulation();
-            }
         }
     }
 
@@ -135,6 +139,7 @@ public class AnimatorWindow : EditorWindow
     }
 
     // --- SimulatingAnimation ---
+
     #region SimulatingAnimation
 
     private void UpdateAnimation()
@@ -157,7 +162,7 @@ public class AnimatorWindow : EditorWindow
             }
         }
     }
-    
+
     public void StartAnimSimulation()
     {
         AnimationMode.StartAnimationMode();
@@ -173,13 +178,33 @@ public class AnimatorWindow : EditorWindow
         EditorApplication.update -= UpdateAnimation;
         _isSimulatingAnimation = false;
     }
-    
-    private void _OnPlayModeStateChange(PlayModeStateChange state)
+
+    public void _OnPlayModeStateChange(PlayModeStateChange state)
     {
-        if (state == PlayModeStateChange.ExitingEditMode) {
+        if (state == PlayModeStateChange.ExitingEditMode)
+        {
             StopAnimSimulation();
         }
     }
-   
+
     #endregion
+}
+
+[Serializable]
+public class AnimatorPlayer
+{
+    public Animator _animator;
+    public AnimationClip[] clips;
+    public int currClip = 0;
+    public float speed = 1;
+
+
+    private int _animatorIndex;
+
+    AnimatorPlayer(int animatorIndex)
+    {
+        _animatorIndex = animatorIndex;
+        _animator = AnimatorWindow.window.animators[animatorIndex];
+        clips = _animator.runtimeAnimatorController.animationClips;
+    }
 }
