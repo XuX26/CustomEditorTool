@@ -13,12 +13,6 @@ public class AnimatorWindow : EditorWindow
     private string[] objectsName;
     private int objectIndex;
 
-    // bool groupEnabled;
-    // bool myBool = true;
-    // float myFloat = 1.23f;
-
-    // Add menu named "CustomAnimator" to the Window menu
-
     [MenuItem("Window/CustomAnimator")]
     static void Init()
     {
@@ -31,17 +25,17 @@ public class AnimatorWindow : EditorWindow
     {
         if (GUILayout.Button("Refresh Animator list"))
             RefreshAnimatorList();
-        
+
         if (animators == null || animators.Length == 0)
         {
             EditorGUILayout.Space();
-            CenterStringsInRow(new []{"/!\\  Animators list is empty  /!\\", "Refresh Animator List"}, true);
+            DisplayAndCenterStrings(new[] {"/!\\  Animators list is empty  /!\\", "Refresh Animator List"}, true, true);
             return;
         }
-        
-        CenterStringsInRow(new []{"Nbr animators in scene : " + animators.Length}, false);
+
+        DisplayAndCenterStrings(new[] {"Nbr animators in scene : " + animators.Length}, false, true);
         EditorGUILayout.Space();
-        
+
         GUILayout.BeginHorizontal();
         GUILayout.Label("Animators : ");
         objectIndex = EditorGUILayout.Popup(objectIndex, objectsName);
@@ -52,6 +46,7 @@ public class AnimatorWindow : EditorWindow
             SceneView.lastActiveSceneView.FrameSelected();
             EditorGUIUtility.PingObject(Selection.activeObject);
         }
+
         GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
         GUILayout.Label("Relative controller :  " + animators[objectIndex].runtimeAnimatorController.name);
@@ -66,14 +61,6 @@ public class AnimatorWindow : EditorWindow
                 animator.Play(animator.GetCurrentAnimatorClipInfo(0).ToString());
             }
         }
-
-        // GUILayout.Label("Base Settings", EditorStyles.boldLabel);
-        // myString = EditorGUILayout.TextField("Text Field", myString);
-        //
-        // groupEnabled = EditorGUILayout.BeginToggleGroup("Optional Settings", groupEnabled);
-        // myBool = EditorGUILayout.Toggle("Toggle", myBool);
-        // myFloat = EditorGUILayout.Slider("Slider", myFloat, -3, 3);
-        // EditorGUILayout.EndToggleGroup();
     }
 
     void RefreshAnimatorList()
@@ -97,7 +84,7 @@ public class AnimatorWindow : EditorWindow
         }
     }
 
-    void GetAnimatorsInChildren(List<Animator> list,Transform parent)
+    void GetAnimatorsInChildren(List<Animator> list, Transform parent)
     {
         foreach (Transform transform in parent)
         {
@@ -107,18 +94,24 @@ public class AnimatorWindow : EditorWindow
         }
     }
 
-    //TODO : middle/center + apply different style
-    void CenterStringsInRow(string[] text, bool bold)
+    void DisplayAndCenterStrings(string[] text, bool bold, bool inARow)
     {
-        GUILayout.BeginHorizontal();
-        GUILayout.FlexibleSpace();
+        if (inARow)
+            GUILayout.BeginHorizontal();
+        
         foreach (string str in text)
         {
+            if (!inARow)
+                GUILayout.BeginHorizontal();
+            
             GUILayout.FlexibleSpace();
-            GUILayout.Label(str, bold? EditorStyles.boldLabel:EditorStyles.label);
+            GUILayout.Label(str, bold ? EditorStyles.boldLabel : EditorStyles.label);
             GUILayout.FlexibleSpace();
+            
+            if (!inARow)
+                GUILayout.EndHorizontal();
         }
-        GUILayout.FlexibleSpace();
-        GUILayout.EndHorizontal();
+        if (inARow)
+            GUILayout.EndHorizontal();
     }
 }
